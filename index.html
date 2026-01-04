@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Swiggy Clone</title>
+  <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.css">
+  <link rel="stylesheet" href="../node_modules/bootstrap-icons/font/bootstrap-icons.css">
+</head>
+<body class="container-fluid bg-light">
+
+  <!-- HEADER -->
+  <header class="bg-warning text-dark shadow-sm p-3 rounded d-flex justify-content-between align-items-center mt-3">
+    <div class="fw-bold fs-3">🍴 Swiggy Clone</div>
+    <nav>
+      <button class="btn btn-outline-dark me-2">Home</button>
+      <button class="btn btn-outline-dark me-2">Restaurants</button>
+      <button class="btn btn-outline-dark me-2">Offers</button>
+      <button class="btn btn-outline-dark">Help</button>
+    </nav>
+    <div>
+      <button class="btn btn-dark position-relative" data-bs-toggle="modal" data-bs-target="#cartModal">
+        <i class="bi bi-cart3"></i> Cart
+        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="cartCount">0</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main class="container mt-4">
+    <div class="row g-4" id="restaurantContainer">
+      <p class="text-center text-muted">Loading restaurants...</p>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="row bg-dark text-white text-center text-md-start mt-5 p-4">
+    <div class="col-md-3 mb-3">
+      <h6>Swiggy</h6>
+      <i class="bi bi-facebook me-2"></i>
+      <i class="bi bi-instagram me-2"></i>
+      <i class="bi bi-twitter me-2"></i>
+      <i class="bi bi-youtube"></i>
+    </div>
+    <div class="col-md-3 mb-3">
+      <h6>Support</h6>
+      <p class="mb-1">Contact Us</p>
+      <p class="mb-1">FAQs</p>
+      <p class="mb-1">Shipping</p>
+      <p class="mb-0">Returns</p>
+    </div>
+    <div class="col-md-3 mb-3">
+      <h6>Company</h6>
+      <p class="mb-1">About</p>
+      <p class="mb-1">Careers</p>
+      <p class="mb-1">Privacy</p>
+      <p class="mb-0">Terms</p>
+    </div>
+    <div class="col-md-3 mb-3">
+      <h6>Contact</h6>
+      <p class="mb-1">📞 +91 9876543210</p>
+      <p class="mb-0">✉ support@swiggy.com</p>
+    </div>
+  </footer>
+
+  <!-- CART MODAL -->
+  <div class="modal fade" id="cartModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">🛒 Your Cart</h5>
+          <button class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" id="cartItems">
+          <p class="text-muted">Your cart is empty.</p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline-secondary" onclick="clearCart()">Clear Cart</button>
+          <button class="btn btn-success">Checkout</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../node_modules/bootstrap/dist/js/bootstrap.bundle.js"></script>
+  <script>
+    let cart = [];
+
+    // Render Restaurants
+    const renderRestaurants = function(list) {
+      const container = document.getElementById("restaurantContainer");
+      container.innerHTML = "";
+
+      list.forEach(res => {
+        container.innerHTML += `
+          <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-0">
+              <img src="${res.image}" class="card-img-top rounded-top" alt="${res.name}" style="height:200px; object-fit:cover;">
+              <div class="card-body">
+                <h5 class="card-title">${res.name}</h5>
+                <p class="card-text text-muted">${res.cuisine}</p>
+                <p class="card-text">
+                  <span class="badge bg-success">⭐ ${res.rating}</span> 
+                  <span class="ms-2 text-secondary">⏱ ${res.deliveryTime} mins</span>
+                </p>
+                <button class="btn btn-warning w-100 fw-bold" onclick="addToCart('${res.name}')">
+                  Add to Cart
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+    };
+
+    // Add to Cart
+    const addToCart = function(name) {
+      cart.push({ name }); // no price now
+      document.getElementById("cartCount").innerText = cart.length;
+      renderCart();
+    };
+
+    // Render Cart
+    const renderCart = function() {
+      const cartDiv = document.getElementById("cartItems");
+      if (cart.length === 0) {
+        cartDiv.innerHTML = `<p class="text-muted">Your cart is empty.</p>`;
+        return;
+      }
+
+      cartDiv.innerHTML = `<ul class="list-group">` +
+        cart.map((item, index) => {
+          return `<li class="list-group-item d-flex justify-content-between align-items-center">
+                    ${item.name}
+                    <button class="btn btn-sm btn-danger ms-2" onclick="removeFromCart(${index})">x</button>
+                  </li>`;
+        }).join("") +
+        `</ul>`;
+    };
+
+    // Remove Item
+    const removeFromCart = function(index) {
+      cart.splice(index, 1);
+      document.getElementById("cartCount").innerText = cart.length;
+      renderCart();
+    };
+
+    // Clear Cart
+    const clearCart = function() {
+      cart = [];
+      document.getElementById("cartCount").innerText = 0;
+      renderCart();
+    };
+
+    // Fetch Data
+    const URL = '../data/restaurants.json';
+    fetch(URL)
+      .then(res => res.json())
+      .then(data => renderRestaurants(data))
+      .catch(err => {
+        console.error(err);
+        document.getElementById("restaurantContainer").innerHTML = `<p class="text-danger">Failed to load restaurants.</p>`;
+      });
+  </script>
+</body>
+</html>
