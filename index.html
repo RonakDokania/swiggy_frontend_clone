@@ -154,7 +154,7 @@
     };
 
     // Fetch Data
-    const URL = '../data/restaurants.json';
+    const URL = './data/restaurants.json';
     fetch(URL)
       .then(res => res.json())
       .then(data => renderRestaurants(data))
